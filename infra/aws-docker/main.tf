@@ -20,6 +20,8 @@ data "aws_subnet" "selected" {
 }
 
 data "aws_ami" "ubuntu" {
+  count = var.ami_id == null ? 1 : 0
+
   most_recent = true
   owners      = ["099720109477"]
 
@@ -218,7 +220,7 @@ resource "aws_ebs_volume" "azerothcore_data" {
 }
 
 resource "aws_instance" "azerothcore" {
-  ami                         = data.aws_ami.ubuntu.id
+  ami                         = var.ami_id == null ? data.aws_ami.ubuntu[0].id : var.ami_id
   instance_type               = var.instance_type
   iam_instance_profile        = aws_iam_instance_profile.instance.name
   subnet_id                   = local.subnet_id

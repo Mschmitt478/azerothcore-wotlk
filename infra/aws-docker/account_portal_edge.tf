@@ -42,12 +42,10 @@ resource "aws_security_group" "account_portal_alb" {
 
   egress {
     description = "To account portal origin"
-    from_port   = 80
-    to_port     = 80
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
-    security_groups = [
-      aws_security_group.azerothcore.id,
-    ]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
@@ -71,8 +69,8 @@ resource "aws_lb" "account_portal" {
 }
 
 resource "aws_lb_target_group" "account_portal" {
-  name        = "${var.name_prefix}-acct"
-  port        = 80
+  name        = "${var.name_prefix}-acct-node"
+  port        = 3000
   protocol    = "HTTP"
   target_type = "instance"
   vpc_id      = local.vpc_id
@@ -81,6 +79,7 @@ resource "aws_lb_target_group" "account_portal" {
     enabled             = true
     path                = "/api/health"
     matcher             = "200"
+    protocol            = "HTTP"
     interval            = 30
     timeout             = 5
     healthy_threshold   = 2
@@ -90,12 +89,16 @@ resource "aws_lb_target_group" "account_portal" {
   tags = {
     Name = "${var.name_prefix}-account-portal-tg"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_lb_target_group_attachment" "account_portal" {
   target_group_arn = aws_lb_target_group.account_portal.arn
   target_id        = var.account_portal_origin_instance_id != null ? var.account_portal_origin_instance_id : aws_instance.azerothcore.id
-  port             = 80
+  port             = 3000
 }
 
 resource "aws_lb_listener" "account_portal_http" {

@@ -38,6 +38,26 @@ output "client_realmlist" {
   value       = "set realmlist ${var.realm_address}"
 }
 
+output "route53_zone_id" {
+  description = "Route 53 hosted zone ID prepared for future warwid.com delegation."
+  value       = aws_route53_zone.warwid.zone_id
+}
+
+output "route53_nameservers" {
+  description = "Nameservers to set at the registrar when switching warwid.com DNS authority to Route 53."
+  value       = aws_route53_zone.warwid.name_servers
+}
+
+output "route53_future_account_portal_record" {
+  description = "Record to create in Route 53 for the WAF-protected account portal after DNS authority moves."
+  value       = "${var.account_portal_hostname} CNAME ${aws_lb.account_portal.dns_name}"
+}
+
+output "route53_future_realm_record" {
+  description = "Record to create in Route 53 for the game realm after DNS authority moves."
+  value       = "${var.realm_address} A ${aws_eip.azerothcore.public_ip}"
+}
+
 output "ssh_command" {
   description = "SSH command, if you configured an EC2 key pair."
   value       = var.ssh_key_name == null ? null : "ssh ubuntu@${aws_eip.azerothcore.public_ip}"

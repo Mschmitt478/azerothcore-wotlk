@@ -48,6 +48,15 @@ locals {
   ecr_registry           = split("/", aws_ecr_repository.azerothcore.repository_url)[0]
 }
 
+resource "aws_route53_zone" "warwid" {
+  name    = var.dns_zone_name
+  comment = "Future authoritative DNS zone for Warwid. Registrar delegation remains manual."
+
+  tags = {
+    Name = var.dns_zone_name
+  }
+}
+
 resource "aws_ecr_repository" "azerothcore" {
   name                 = var.ecr_repository_name
   image_tag_mutability = "MUTABLE"

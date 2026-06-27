@@ -118,6 +118,12 @@ variable "account_portal_hostname" {
   default     = "accounts.warwid.com"
 }
 
+variable "dns_zone_name" {
+  description = "Public DNS zone to prepare in Route 53. Delegation is manual at the registrar."
+  type        = string
+  default     = "warwid.com"
+}
+
 variable "account_portal_certificate_arn" {
   description = "Issued ACM certificate ARN for the account portal ALB HTTPS listener. Leave null until DNS validation has issued the certificate."
   type        = string

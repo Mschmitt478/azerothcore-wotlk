@@ -55,37 +55,26 @@ Rollback:
 - Revert the Dockerfile patch-application step.
 - The preserved patch file can remain as documentation, or be removed if a module fork/upstream fix replaces it.
 
-## 2026-07-01 - EMBER-62 Live Deployment Validation
+## 2026-07-01 - EMBER-39 AHBot Bracket Audit
 
 No gameplay tuning changes were made.
 
-Backup:
-
-- `/srv/azerothcore/backups/2026-07-01-220619-pre-ember-62-deploy`
-
 Actions:
 
-- Built and pushed Warwid `master` images after PR `#6` was merged.
-- Refreshed live host ECR login and deployed the new `ac-authserver`, `ac-worldserver`, and `ac-db-import` images.
-- Ran `ac-db-import` before recreating the auth/world containers.
-- Database importer applied upstream character update `2026_06_24_00.sql` and world updates `2026_06_25_00.sql` through `2026_06_30_06.sql`.
-- Recreated `ac-worldserver` with image ID `sha256:fba595dcd527847bc1053856dd065078c8d1e70e7315ef9590364a803ed82e12`.
-- Verified live worldserver revision `bfed8ec04af8+ 2026-07-01 18:03:03 -0400 (master branch)`.
-- Ran `server info` through a pseudo-TTY Docker attach.
-- Ran `.ab getoffset` through the same console path that previously restarted the server.
-- Observed `.ab getoffset` return `Current Player Difficulty Offset = 0.`.
-- Ran `.ab mapstat` from the bare console and observed a safe context error: `This command can only be used in a dungeon or raid.`
-- Ran `.ab creaturestat` from the bare console and observed a safe context error: `You should select a creature.`
-- Verified `ac-worldserver` remained running with Docker `RestartCount = 0`.
-- Reran the read-only Phase 2 audit after deployment.
-- Recorded AHBot baseline after deployment: `250` bot-owned auctions, all quality `1`, total buyout `298.11g`, `0` vendor-resale candidates.
-- Recorded Individual Progression baseline after deployment: `18` hidden progression quests and `2381` condition rows.
+- Added a read-only AHBot bracket audit at `tools/warwid/phase2_ahbot_bracket_audit.sql`.
+- Added runner `tools/warwid/run-live-ahbot-bracket-audit.sh`.
+- Ran the audit against the live database.
+- Recorded `250` bot-owned auctions with total buyout `298.11g`.
+- Recorded all `250` auctions as quality `1`.
+- Recorded `0` risky quality/level auctions.
+- Recorded `0` vendor-resale candidates and `0.0000g` possible vendor profit.
+- Recorded level-bracket mix: `40` cosmetic/trade/low, `88` level 1-19, `28` level 20-39, `29` level 40-59, `17` level 60-69, `12` level 70-79, `5` level 80, `31` no required level.
+- Recorded class mix led by consumables (`62`, `221.44g`) and glyphs (`62`, `12.75g`), with only `23` trade-good auctions.
 
 Rollback:
 
-- Restore the pre-deploy backup if database rollback is required.
-- Redeploy the previous ECR image digest if the new runtime image must be backed out.
-- Reverting the documentation-only evidence entry requires reverting this commit.
+- No config or database rollback required.
+- To remove the audit tooling, revert the commit that adds the two `tools/warwid` files.
 
 ## Existing Small-Group Profile Values
 
